@@ -1,27 +1,33 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, onMounted } from 'vue' // Dinagdag natin ang watch at onMounted
 
-// 1. Dito natin ise-save ang mga tasks
 const newTask = ref('')
-const todos = ref([
-  { id: 1, text: 'Matuto ng Vue.js', done: true },
-  { id: 2, text: 'Gumawa ng App', done: false }
-])
+const todos = ref([]) // Gawin nating empty array muna sa simula
 
-// 2. Function para magdagdag ng task
+// 1. PAGBUKAS NG APP: Basahin ang nakasave sa LocalStorage
+onMounted(() => {
+  const savedTodos = localStorage.getItem('my-vue-todos')
+  if (savedTodos) {
+    todos.value = JSON.parse(savedTodos)
+  }
+})
+
+// 2. PAG MAY NAGBAGO SA LISTAHAN: I-save agad sa LocalStorage
+// Ang "deep: true" ay para mabantayan pati yung loob ng array (pag nag-check ng box)
+watch(todos, (newVal) => {
+  localStorage.setItem('my-vue-todos', JSON.stringify(newVal))
+}, { deep: true })
+
 function addTodo() {
-  if (newTask.value.trim() === '') return // Wag mag-add kung empty
-  
+  if (newTask.value.trim() === '') return
   todos.value.push({
     id: Date.now(),
     text: newTask.value,
     done: false
   })
-  
-  newTask.value = '' // Clear ang input box pagkatapos mag-add
+  newTask.value = ''
 }
 
-// 3. Function para mag-delete
 function removeTodo(todo) {
   todos.value = todos.value.filter((t) => t !== todo)
 }
