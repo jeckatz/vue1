@@ -1,8 +1,23 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue' // Dinagdag natin ang watch at onMounted
+import { ref, watch, onMounted, computed } from 'vue' // Dinagdag natin ang watch at onMounted
 
 const newTask = ref('')
 const todos = ref([]) // Gawin nating empty array muna sa simula
+
+// 1. Check natin kung lahat ng tasks ay "done" na
+const allDone = computed(() => {
+  return todos.value.length > 0 && todos.value.every(todo => todo.done)
+})
+
+// Kunin natin kung ilan ang HINDI pa tapos (done: false)
+const remainingCount = computed(() => {
+  return todos.value.filter(t => !t.done).length
+})
+
+// Dito natin ise-set kung "task" or "tasks"
+const taskWord = computed(() => {
+  return remainingCount.value === 1 ? 'task' : 'tasks'
+})
 
 // 1. PAGBUKAS NG APP: Basahin ang nakasave sa LocalStorage
 onMounted(() => {
@@ -50,7 +65,17 @@ function removeTodo(todo) {
       </li>
     </TransitionGroup>
 
-    <p v-if="todos.length === 0">Yehey! Tapos na lahat. 🥳</p>
+    <div class="todo-app">
+      <div class="status-messages">
+        <p v-if="todos.length === 0">Wala pa.</p>
+
+        <p v-else-if="allDone">Yehey! Tapos na lahat. 🥳</p>
+        
+        <p v-else>
+          May {{ remainingCount }} {{ taskWord }} ka pang kailangang tapusin. 💪
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -87,5 +112,9 @@ li {
 /* 3. Para hindi "tumatalon" yung ibang items pag may tinanggal ka */
 .list-move {
   transition: transform 0.5s ease;
+}
+
+template{
+   transition: transform 0.5s ease;
 }
 </style>
